@@ -1,0 +1,10 @@
+name: chromatic
+on:
+  push:
+    branches: ["**"]
+    tags-ignore: ["**"]
+
+jobs:
+  chromatic:
+    uses: itdesign-gmbh/mp-ci/.github/workflows/chromatic.yml@workflows/chromatic/v1
+    secrets: inherit

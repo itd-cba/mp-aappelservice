@@ -1,0 +1,12 @@
+{
+  "name": "root",
+  "version": "0.1.0",
+  "description": "root package for coordination",
+  "private": true,
+  "devDependencies": {
+    "husky": "^5.1.3"
+  },
+  "scripts": {
+    "prepare": "husky install"
+  }
+}

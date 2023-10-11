@@ -1,0 +1,32 @@
+# Gradle
+.gradle/
+?/
+build/
+out/
+reports/
+!gradle/wrapper/gradle-wrapper.jar
+.gradletaskcache
+
+# React/Node/Yarn
+node_modules/
+coverage/
+junit.xml
+build/
+storybook/
+__generated__/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+build-storybook.log
+
+# Misc
+.DS_Store
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Microfrontend definition
+templaniantiger.json

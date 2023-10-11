@@ -1,0 +1,52 @@
+{
+  "name": "@meisterplan/templaniantiger-wrapper",
+  "author": "team-platform",
+  "license": "UNLICENSED",
+  "version": "0.1.0",
+  "description": "Wrapper for a simple integration into our WebApp",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/itdesign-gmbh/mp-templaniantiger"
+  },
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "scripts": {
+    "build": "yarn prettier-check && yarn eslint-check && tsc",
+    "prettier-check": "prettier --check \"src/**/*.{ts,tsx,css,json,js,jsx}\"",
+    "eslint-check": "eslint --max-warnings=0 --ext js,jsx,ts,tsx src",
+    "precommit": "lint-staged"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,tsx}": [
+      "eslint --max-warnings=0"
+    ],
+    "src/**/*.{ts,tsx,css,json,js,jsx}": [
+      "prettier --check"
+    ],
+    "package.json": [
+      "prettier --check"
+    ]
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0"
+  },
+  "dependencies": {
+    "@meisterplan/microfrontend-react": "3.2.213"
+  },
+  "devDependencies": {
+    "@types/react": "18.2.13",
+    "@typescript-eslint/eslint-plugin": "^5.60.0",
+    "@typescript-eslint/parser": "^5.60.0",
+    "babel-eslint": "^10.0.0",
+    "eslint": "^8.43.0",
+    "eslint-config-react-app": "^7.0.1",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-jest": "^27.2.2",
+    "eslint-plugin-jsx-a11y": "^6.7.1",
+    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "lint-staged": "^13.2.2",
+    "prettier": "^2.8.8",
+    "typescript": "^5.1.3"
+  }
+}

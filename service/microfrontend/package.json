@@ -1,0 +1,92 @@
+{
+  "name": "templaniantiger-microfrontend",
+  "author": "team-platform",
+  "license": "UNLICENSED",
+  "version": "0.1.0",
+  "description": "The TemplanianTiger microfrontend",
+  "homepage": "./",
+  "private": true,
+  "scripts": {
+    "preinstall": "cd ../microfrontend-wrapper && yarn install && yarn build && cd ../microfrontend && yarn upgrade @meisterplan/templaniantiger-wrapper",
+    "postinstall": "yarn codegen",
+    "start": "cross-env HTTPS=true SSL_CRT_FILE=$HOME/.mp/dev-tls.crt SSL_KEY_FILE=$HOME/.mp/dev-tls.key PORT=8780 TSC_COMPILE_ON_ERROR=true FAST_REFRESH=false WDS_SOCKET_HOST=microfrontends.local.meisterplan.dev WDS_SOCKET_PORT=8780 BROWSER=none react-scripts start",
+    "build": "react-scripts build",
+    "prebuild": "yarn prettier-check && yarn eslint-check && tsc",
+    "prettier-check": "prettier --check \"src/**/*.{ts,tsx,css,json,js,jsx}\"",
+    "eslint-check": "eslint --max-warnings=0 --ext js,jsx,ts,tsx src",
+    "test": "react-scripts test --env=jsdom --reporters=default --reporters=jest-junit",
+    "test:staged": "cross-env CI=true react-scripts test --env=jsdom --bail --findRelatedTests",
+    "storybook": "storybook dev -p 9001 -c .storybook",
+    "build-storybook": "storybook build -c .storybook -o storybook",
+    "precommit": "lint-staged",
+    "codegen": "graphql-codegen --config codegen.ts",
+    "chromatic": "chromatic --project-token=48f00a12e43d --only-changed",
+    "download-schema-prod": "rover graph introspect https://graphql.eu.meisterplan.com/graphql -H apollographql-client-name:download-schema-templaniantiger > .apollo/federated-schema.graphqls",
+    "download-schema-staging": "rover graph introspect https://graphql.meisterplan.io/graphql -H apollographql-client-name:download-schema-templaniantiger > .apollo/federated-schema.graphqls"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,tsx}": [
+      "eslint --max-warnings=0",
+      "yarn test:staged"
+    ],
+    "src/**/*.{ts,tsx,css,json,js,jsx}": [
+      "prettier --check"
+    ],
+    "package.json": [
+      "prettier --check"
+    ]
+  },
+  "dependencies": {
+    "@apollo/client": "3.7.16",
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@formatjs/intl-relativetimeformat": "11.2.4",
+    "@js-joda/core": "^5.5.3",
+    "@meisterplan/appaxolotl-api": "2.0.184",
+    "@meisterplan/authenticorn-utils": "1.2.134",
+    "@meisterplan/configcentipede-wrapper": "^1.2.49",
+    "@meisterplan/templaniantiger-wrapper": "file:../microfrontend-wrapper",
+    "@meisterplan/ui-react": "8.0.6",
+    "@mui/icons-material": "^5.11.16",
+    "@mui/material": "^5.13.5",
+    "intl-pluralrules": "2.0.0",
+    "react": "18.2.0",
+    "react-app-polyfill": "3.0.0",
+    "react-dom": "18.2.0",
+    "react-intl": "6.4.4",
+    "tss-react": "^4.8.6"
+  },
+  "devDependencies": {
+    "@apollo/rover": "^0.16.0",
+    "@graphql-codegen/cli": "^4.0.1",
+    "@graphql-codegen/client-preset": "^4.0.1",
+    "@meisterplan/browserslist-config": "1.0.1",
+    "@meisterplan/eslint-plugin-lintloris": "^1.0.25",
+    "@storybook/addon-essentials": "^7.0.23",
+    "@storybook/preset-create-react-app": "7.0.23",
+    "@storybook/react": "7.0.23",
+    "@storybook/react-webpack5": "^7.0.23",
+    "@testing-library/jest-dom": "5.16.5",
+    "@testing-library/react": "14.0.0",
+    "@types/react": "18.2.13",
+    "@types/react-dom": "18.2.6",
+    "apollo": "2.34.0",
+    "chromatic": "6.19.8",
+    "cross-env": "7.0.3",
+    "del-cli": "5.0.0",
+    "jest-junit": "16.0.0",
+    "lint-staged": "13.2.2",
+    "prettier": "2.8.8",
+    "react-scripts": "5.0.1",
+    "react-test-renderer": "18.2.0",
+    "storybook": "^7.0.23",
+    "tsconfig-paths-webpack-plugin": "4.0.1",
+    "typescript": "5.1.3"
+  },
+  "resolutions": {
+    "@types/react": "18.2.13"
+  },
+  "browserslist": [
+    "extends @meisterplan/browserslist-config"
+  ]
+}

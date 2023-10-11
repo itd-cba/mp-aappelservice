@@ -1,0 +1,9 @@
+project_id: 197762
+api_token_env: CROWDIN_PERSONAL_TOKEN
+preserve_hierarchy: true
+
+files:
+  - source: /service/microfrontend/src/i18n/templaniantiger/translations.json
+    dest: /service-templaniantiger/translations_microfrontend.json
+    translation: /service/microfrontend/src/i18n/templaniantiger/translations_%two_letters_code%.json
+    update_option: update_as_unapproved

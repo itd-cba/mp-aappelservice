@@ -1,0 +1,92 @@
+name: CI Build
+on:
+  pull_request:
+  push:
+    branches: [master, hotfix/*]
+
+permissions:
+  id-token: write
+  checks: write
+  packages: write
+  actions: read
+  contents: write
+  issues: read
+  pull-requests: write
+
+jobs:
+  validate-gql-schema:
+    name: validate
+    uses: "itdesign-gmbh/mp-ci/.github/workflows/ci-validate-gql-schema.yml@workflows/ci-validate-gql-schema/v2"
+    if: github.event_name == 'pull_request'
+    with:
+      target: staging
+      validate-server: false
+      node-version: "16"
+      apollo-version: "2.28.0"
+    secrets: inherit
+
+  test-microfrontend:
+    runs-on: ubuntu-latest
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+          cache: "yarn"
+          cache-dependency-path: "**/yarn.lock"
+      - run: 'echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc'
+      - run: make microfrontend-test
+      - uses: EnricoMi/publish-unit-test-result-action@dc4b2f22e07d0995dffe65daf902598f695e8827
+        if: always()
+        with:
+          files: "**/microfrontend/junit.xml"
+          check_name: "Unit Test Results (Frontend)"
+
+  build-microfrontend:
+    runs-on: ubuntu-latest
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+          cache: "yarn"
+          cache-dependency-path: "**/yarn.lock"
+      - run: 'echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc'
+      - run: make microfrontend-build
+      - uses: actions/upload-artifact@v3
+        with:
+          name: microfrontend
+          path: service/microfrontend/build/
+
+  upload-microfrontend:
+    needs: ["test-microfrontend", "build-microfrontend"]
+    name: upload
+    if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/hotfix/')
+    uses: itdesign-gmbh/mp-ci/.github/workflows/ci-mf-upload.yml@workflows/ci-mf-upload/v1
+    secrets: inherit
+    with:
+      service-name: "templaniantiger"
+
+  trigger-deployment:
+    needs: ["upload-microfrontend"]
+    name: deployment
+    uses: itdesign-gmbh/mp-ci/.github/workflows/ci-trigger-deployment.yml@workflows/ci-trigger-deployment/v1
+    secrets: inherit
+
+  # notification & jira transitions -----------------------
+  jira-transition-in-build:
+    if: github.ref == 'refs/heads/master'
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 10
+      - uses: meisterplan/actions-jiratransition@v1
+        with:
+          transition_name: "In Build"
+          service_base_url: ${{ secrets.JIRA_TRANSITIONS_BASE_URL }}

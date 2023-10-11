@@ -1,0 +1,104 @@
+run-name: Deploy to ${{ join(fromJSON(inputs.target == 'prod' && '["prod-eu", "prod-us"]' || format('["{0}"]', inputs.target)), ', ') }}
+name: CI Deploy
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        required: true
+        type: choice
+        options:
+          - staging
+          - prod
+
+permissions:
+  id-token: write
+  checks: write
+  packages: write
+  actions: write
+  contents: write
+  issues: read
+  pull-requests: write
+
+concurrency: "ci-deploy-${{ github.event.inputs.target }}"
+
+jobs:
+  validate-gql-schema:
+    name: validate
+    uses: "itdesign-gmbh/mp-ci/.github/workflows/ci-validate-gql-schema.yml@workflows/ci-validate-gql-schema/v2"
+    with:
+      target: ${{ inputs.target }}
+      validate-server: false
+      node-version: "16"
+      apollo-version: "2.28.0"
+    secrets: inherit
+
+  check-artifact:
+    uses: itdesign-gmbh/mp-ci/.github/workflows/ci-check-mf-artifact.yml@workflows/ci-check-mf-artifact/v1
+    with:
+      service-name: "templaniantiger"
+      target: ${{ inputs.target }}
+    secrets: inherit
+
+  # deploy
+  deploy:
+    needs: [validate-gql-schema, check-artifact]
+    uses: itdesign-gmbh/mp-ci/.github/workflows/ci-mf-deploy.yml@workflows/ci-mf-deploy/v1
+    with:
+      service-name: "templaniantiger"
+      target: ${{ inputs.target }}
+    secrets: inherit
+
+  publish-microfrontend-wrapper:
+    needs: deploy
+    if: inputs.target == 'prod'
+    runs-on: ubuntu-latest
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+          cache: "yarn"
+          cache-dependency-path: "**/yarn.lock"
+      - run: 'echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc'
+      - run: make microfrontend-wrapper-publish VERSION=1.1."${GITHUB_RUN_NUMBER}"
+
+  # notification & jira transitions -----------------------
+
+  jira-transition-in-deployment:
+    needs: [validate-gql-schema, check-artifact]
+    if: inputs.target == 'staging'
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 10
+      - uses: meisterplan/actions-jiratransition@v1
+        with:
+          transition_name: "In Deployment"
+          service_base_url: ${{ secrets.JIRA_TRANSITIONS_BASE_URL }}
+
+  jira-transition-closed:
+    needs: deploy
+    if: inputs.target == 'staging'
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 10
+      - uses: meisterplan/actions-jiratransition@v1
+        with:
+          transition_name: "Closed"
+          service_base_url: ${{ secrets.JIRA_TRANSITIONS_BASE_URL }}
+
+  release-notification:
+    name: release
+    uses: itdesign-gmbh/mp-ci/.github/workflows/ci-release-notification.yml@workflows/ci-release-notification/v1
+    needs: [deploy]
+    with:
+      target: ${{ inputs.target }}
+    secrets: inherit
+

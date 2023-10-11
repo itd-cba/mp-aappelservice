@@ -1,0 +1,10 @@
+name: crowdin
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "18 1-23/2 * * *"  # Please see https://itdesign-de.atlassian.net/l/c/fzuTJEy2 to find and add your own next free scheduling slot
+
+jobs:
+  crowdin:
+    uses: itdesign-gmbh/mp-crowdin/.github/workflows/crowdin-sync.yml@workflows/crowdin-sync/v1
+    secrets: inherit

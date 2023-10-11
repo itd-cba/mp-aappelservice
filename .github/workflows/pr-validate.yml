@@ -1,0 +1,14 @@
+# Validate GitHub Actions workflows with https://github.com/rhysd/actionlint linter
+name: PR Validate
+on:
+  pull_request:
+
+jobs:
+  validate-workflows:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Add actionlint problem matcher
+        run: echo "::add-matcher::.github/actionlint-matcher.json"
+      - name: Lint workflows
+        uses: docker://rhysd/actionlint@sha256:02ccb6d91e4cb4a7b21eb99d5274d257e81ae667688d730e89d7ea0d6d35db91 # pinning version 1.6.23

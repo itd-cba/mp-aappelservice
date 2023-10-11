@@ -1,0 +1,39 @@
+id: templaniantiger
+niceName: TemplanianTiger
+repositoryUrl: https://github.com/meisterplan/templaniantiger
+devType: self-developed
+
+owner:
+  - team-platform
+
+audience:
+  - developer
+
+summary: A template repository to quickly bootstrap a microfrontend
+description: >
+  This service contains all commonly used configuration to quickly bootstrap a new microfrontend.
+
+dependencies:
+  - serviceId: aws
+    interfaceType: s3
+  - serviceId: micromanatee
+    interfaceType: distribution
+
+interfaces:
+  - type: microfrontend
+    spec: https://www.npmjs.com/package/@meisterplan/templaniantiger-wrapper
+
+publishedArtifacts:
+  - '@meisterplan/templaniantiger-wrapper'
+
+data:
+  processes:
+    - data from the TemplateTiger backend
+
+ports:
+  - name: microfrontend
+    port: 8780
+
+links:
+  - name: Storybook (Microfrontend)
+    url: https://www.chromatic.com/library?appId=6319901ffeb0be80d2a2615f

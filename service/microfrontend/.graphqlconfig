@@ -1,0 +1,5 @@
+{
+    "name": "Meisterplan Federation Schema",
+    "schemaPath": ".apollo/federated-schema.graphqls",
+    "extensions": {}
+}
